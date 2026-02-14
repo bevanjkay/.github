@@ -27,11 +27,11 @@ jobs:
       matrix:
         repo:
           - bevanjkay/fluro-sheet-music
-          - bevanjkay/giving-kiosk
+          - bevanjkay/homebrew-formulae
+          - bevanjkay/homebrew-tap
           - bevanjkay/modern-square-kds
           - bevanjkay/n8n-kaynas
-          - bevanjkay/homebrew-tap
-          - bevanjkay/homebrew-formulae
+          - gatewaymedia/giving-kiosk
           - gatewaymedia/homebrew-tap
       fail-fast: false
     steps:
@@ -105,7 +105,7 @@ jobs:
         env:
           GH_REPO: ${{ matrix.repo }}
           GH_TOKEN: ${{ secrets.BKDBOT_TOKEN }}
-          HEAD_PREFIX: ${{ contains(matrix.repo, 'gatewaymedia/') && 'gatewaymedia' || 'bevankay' }}
+          HEAD_PREFIX: ${{ contains(matrix.repo, 'gatewaymedia/') && 'gatewaymedia' || 'bevanjkay' }}
 
   conclusion:
     needs: sync
