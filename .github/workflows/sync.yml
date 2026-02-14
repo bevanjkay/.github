@@ -90,6 +90,7 @@ jobs:
               jq --exit-status 'length == 0'
           then
             git push --set-upstream --force origin sync-shared-config
+            # shellcheck disable=SC2016
             gh pr create \
               --repo "${GH_REPO}" \
               --head sync-shared-config \
