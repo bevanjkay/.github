@@ -26,12 +26,12 @@ jobs:
     strategy:
       matrix:
         repo:
-          - bevankay/fluro-sheet-music
-          - bevankay/giving-kiosk
-          - bevankay/modern-square-kds
-          - bevankay/n8n-kaynas
-          - bevankay/homebrew-tap
-          - bevankay/homebrew-formulae
+          - bevanjkay/fluro-sheet-music
+          - bevanjkay/giving-kiosk
+          - bevanjkay/modern-square-kds
+          - bevanjkay/n8n-kaynas
+          - bevanjkay/homebrew-tap
+          - bevanjkay/homebrew-formulae
           - gatewaymedia/homebrew-tap
       fail-fast: false
     steps:
