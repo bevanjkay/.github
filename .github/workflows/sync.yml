@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   sync:
-    if: github.repository == 'bevankay/.github'
+    if: github.repository == 'bevanjkay/.github'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -95,7 +95,7 @@ jobs:
               --repo "${GH_REPO}" \
               --head sync-shared-config \
               --title "Synchronize shared configuration" \
-              --body 'This pull request was created automatically by the [`sync-shared-config`](https://github.com/bevankay/.github/blob/HEAD/.github/workflows/sync.yml) workflow.'
+              --body 'This pull request was created automatically by the [`sync-shared-config`](https://github.com/bevanjkay/.github/blob/HEAD/.github/workflows/sync.yml) workflow.'
           else
             git fetch origin sync-shared-config
             if ! git diff --no-ext-diff --quiet --exit-code origin/sync-shared-config; then
