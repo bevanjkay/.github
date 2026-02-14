@@ -1,0 +1,118 @@
+name: Sync shared configurations
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 8 * * 3" # Every Wednesday at 8 AM
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash -xeuo pipefail {0}
+
+concurrency:
+  group: "sync-shared-config-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    if: github.repository == 'bevankay/.github'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        repo:
+          - bevankay/fluro-sheet-music
+          - bevankay/giving-kiosk
+          - bevankay/modern-square-kds
+          - bevankay/n8n-kaynas
+          - bevankay/homebrew-tap
+          - bevankay/homebrew-formulae
+          - gatewaymedia/homebrew-tap
+      fail-fast: false
+    steps:
+      - name: Clone source repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Clone target repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: ${{ matrix.repo }}
+          path: target
+          token: ${{ secrets.BKDBOT_TOKEN }}
+          persist-credentials: true
+
+      - name: Configure Git user
+        run: |
+          cd target
+          git config user.name "bkdbot"
+          git config user.email "bkdbot@users.noreply.github.com"
+
+      - name: Copy sync files
+        run: |
+          mkdir -p target/.github/workflows
+          cp .github/workflows/actionlint.yml target/.github/workflows/actionlint.yml
+          cp .github/zizmor.yml target/.github/zizmor.yml
+          cp .github/dependabot.yml target/.github/dependabot.yml
+
+      - name: Detect changes
+        id: detect_changes
+        run: |
+          cd target
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changed=true" >> "${GITHUB_OUTPUT}"
+            git diff
+          else
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Create pull request
+        if: steps.detect_changes.outputs.changed == 'true'
+        run: |
+          cd target
+          git add -A
+          git commit -m "Synchronize shared configuration"
+          git checkout -B sync-shared-config
+
+          if gh api \
+              -X GET \
+              --header 'Accept: application/vnd.github+json' \
+              --header 'X-GitHub-Api-Version: 2022-11-28' \
+              "/repos/${GH_REPO}/pulls" \
+              -f head="${HEAD_PREFIX}:sync-shared-config" \
+              -f state=open |
+              jq --exit-status 'length == 0'
+          then
+            git push --set-upstream --force origin sync-shared-config
+            gh pr create \
+              --repo "${GH_REPO}" \
+              --head sync-shared-config \
+              --title "Synchronize shared configuration" \
+              --body 'This pull request was created automatically by the [`sync-shared-config`](https://github.com/bevankay/.github/blob/HEAD/.github/workflows/sync.yml) workflow.'
+          else
+            git fetch origin sync-shared-config
+            if ! git diff --no-ext-diff --quiet --exit-code origin/sync-shared-config; then
+              git push --force origin sync-shared-config
+            fi
+          fi
+        env:
+          GH_REPO: ${{ matrix.repo }}
+          GH_TOKEN: ${{ secrets.BKDBOT_TOKEN }}
+          HEAD_PREFIX: ${{ contains(matrix.repo, 'gatewaymedia/') && 'gatewaymedia' || 'bevankay' }}
+
+  conclusion:
+    needs: sync
+    runs-on: ubuntu-slim
+    if: always()
+    steps:
+      - name: Result
+        env:
+          RESULT: ${{ needs.sync.result }}
+        run: |
+          [[ "${RESULT}" == success ]]
