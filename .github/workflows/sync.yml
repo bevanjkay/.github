@@ -31,6 +31,7 @@ jobs:
           - bevanjkay/homebrew-tap
           - bevanjkay/modern-square-kds
           - bevanjkay/n8n-kaynas
+          - gatewaymedia/dotfiles
           - gatewaymedia/giving-kiosk
           - gatewaymedia/homebrew-tap
       fail-fast: false
