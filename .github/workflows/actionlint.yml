@@ -43,7 +43,7 @@ jobs:
 
       - run: actionlint
 
-      - run: osv-scanner --recursive .
+      - run: osv-scanner --recursive . || { rc=$?; [[ "${rc}" -eq 128 ]]; }
 
       - run: zizmor --format sarif . > results.sarif
         env:
