@@ -22,6 +22,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    outputs:
+      osv-sarif: ${{ steps.osv.outputs.sarif }}
     steps:
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@04a6d8cfe9d251e2afb78c5bdc6274ec9642aea2 # master
@@ -44,12 +46,23 @@ jobs:
       - run: actionlint
 
       - name: Run OSV Scanner
-        run: osv-scanner --format sarif --output osv-results.sarif --recursive .
+        id: osv
+        run: |
+          rc=0
+          osv-scanner --format sarif --output osv-results.sarif --recursive . || rc=$?
+          if [[ "${rc}" -eq 128 ]]; then
+            echo "sarif=false" >> "${GITHUB_OUTPUT}"
+          elif [[ "${rc}" -ne 0 ]]; then
+            echo "sarif=true" >> "${GITHUB_OUTPUT}"
+            exit "${rc}"
+          else
+            echo "sarif=true" >> "${GITHUB_OUTPUT}"
+          fi
         continue-on-error: true
 
       - name: Upload OSV Scanner SARIF artifact
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
-        if: always() && github.event_name != 'merge_group'
+        if: always() && steps.osv.outputs.sarif == 'true' && github.event_name != 'merge_group'
         with:
           name: osv-results.sarif
           path: osv-results.sarif
@@ -94,6 +107,7 @@ jobs:
     needs: workflow_syntax
     if: >
       always() &&
+      needs.workflow_syntax.outputs.osv-sarif == 'true' &&
       !contains(fromJSON('["cancelled", "skipped"]'), needs.workflow_syntax.result) &&
       !github.event.repository.private &&
       github.event_name != 'merge_group'
