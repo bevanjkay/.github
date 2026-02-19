@@ -43,7 +43,17 @@ jobs:
 
       - run: actionlint
 
-      - run: osv-scanner --recursive . || { rc=$?; [[ "${rc}" -eq 128 ]]; }
+      - name: Run OSV Scanner
+        run: osv-scanner --format sarif --output osv-results.sarif --recursive .
+        continue-on-error: true
+
+      - name: Upload OSV Scanner SARIF artifact
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        if: always() && github.event_name != 'merge_group'
+        with:
+          name: osv-results.sarif
+          path: osv-results.sarif
+          if-no-files-found: ignore
 
       - run: zizmor --format sarif . > results.sarif
         env:
@@ -79,6 +89,30 @@ jobs:
         with:
           sarif_file: results.sarif
           category: zizmor
+
+  osv_upload_sarif:
+    needs: workflow_syntax
+    if: >
+      always() &&
+      !contains(fromJSON('["cancelled", "skipped"]'), needs.workflow_syntax.result) &&
+      !github.event.repository.private &&
+      github.event_name != 'merge_group'
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Download OSV Scanner SARIF artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: osv-results.sarif
+          path: osv-results.sarif
+
+      - name: Upload OSV Scanner SARIF to Code Scanning
+        uses: github/codeql-action/upload-sarif@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v4.31.10
+        with:
+          sarif_file: osv-results.sarif
+          category: osv-scanner
 
   trivy:
     runs-on: ubuntu-latest
