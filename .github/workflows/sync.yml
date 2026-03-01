@@ -26,6 +26,7 @@ jobs:
     strategy:
       matrix:
         repo:
+          - bevanjkay/bible-api
           - bevanjkay/fluro-sheet-music
           - bevanjkay/homebrew-formulae
           - bevanjkay/homebrew-tap
