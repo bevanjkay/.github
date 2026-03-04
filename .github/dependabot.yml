@@ -5,8 +5,8 @@ updates:
     schedule:
       interval: weekly
       day: monday
-      time: "08:00"
-      timezone: "Australia/Melbourne"
+      time: !!str 08:00
+      timezone: Australia/Melbourne
     groups:
       npm-dependencies:
         patterns:
@@ -18,8 +18,8 @@ updates:
     schedule:
       interval: weekly
       day: monday
-      time: "08:00"
-      timezone: "Australia/Melbourne"
+      time: !!str 08:00
+      timezone: Australia/Melbourne
     groups:
       gh-actions:
         patterns:
