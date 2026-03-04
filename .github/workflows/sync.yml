@@ -28,6 +28,7 @@ jobs:
         repo:
           - bevanjkay/bible-api
           - bevanjkay/custom-scripts
+          - bevanjkay/docker-wwcc
           - bevanjkay/dotfiles
           - bevanjkay/fluro-sheet-music
           - bevanjkay/homebrew-formulae
@@ -36,6 +37,7 @@ jobs:
           - bevanjkay/n8n-kaynas
           - bevanjkay/pake-builder
           - bevanjkay/personal-website
+          - bevanjkay/yavic-responseportal
           - bevanjkay/youthalivevictoria
           - gatewaymedia/dotfiles
           - gatewaymedia/giving-kiosk
