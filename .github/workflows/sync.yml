@@ -27,12 +27,16 @@ jobs:
       matrix:
         repo:
           - bevanjkay/bible-api
+          - bevanjkay/custom-scripts
+          - bevanjkay/dotfiles
           - bevanjkay/fluro-sheet-music
           - bevanjkay/homebrew-formulae
           - bevanjkay/homebrew-tap
           - bevanjkay/modern-square-kds
           - bevanjkay/n8n-kaynas
+          - bevanjkay/pake-builder
           - bevanjkay/personal-website
+          - bevanjkay/youthalivevictoria
           - gatewaymedia/dotfiles
           - gatewaymedia/giving-kiosk
           - gatewaymedia/homebrew-tap
