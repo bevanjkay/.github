@@ -2,8 +2,8 @@ version: 2
 updates:
   - package-ecosystem: npm
     directories:
-      - "/"
-      - "/*"
+      - /
+      - /**/*
     schedule:
       interval: weekly
       day: monday
