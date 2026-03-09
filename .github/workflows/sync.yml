@@ -22,6 +22,7 @@ concurrency:
 jobs:
   sync:
     if: github.repository == 'bevanjkay/.github'
+    environment: github_actions
     runs-on: ubuntu-latest
     strategy:
       matrix:

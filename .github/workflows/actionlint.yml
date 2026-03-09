@@ -151,7 +151,7 @@ jobs:
     # Flags newly-introduced vulnerable dependencies on PRs before they land on main
     # Requires GitHub Advanced Security on private repos — skip silently if not available
     if: github.event_name == 'pull_request' && !github.event.repository.private
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       contents: read
     steps:
