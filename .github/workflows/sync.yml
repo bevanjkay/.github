@@ -38,6 +38,7 @@ jobs:
           - bevanjkay/n8n-kaynas
           - bevanjkay/pake-builder
           - bevanjkay/personal-website
+          - bevanjkay/tools
           - bevanjkay/yavic-responseportal
           - bevanjkay/youthalivevictoria
           - gatewaymedia/dotfiles
