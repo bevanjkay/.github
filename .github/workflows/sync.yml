@@ -43,6 +43,7 @@ jobs:
           - bevanjkay/youthalivevictoria
           - gatewaymedia/dotfiles
           - gatewaymedia/giving-kiosk
+          - gatewaymedia/handbook
           - gatewaymedia/homebrew-tap
       fail-fast: false
     steps:
