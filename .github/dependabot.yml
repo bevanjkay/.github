@@ -5,8 +5,7 @@ updates:
       - /
       - /**/*
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
       time: !!str 08:00
       timezone: Australia/Melbourne
     groups:
@@ -18,8 +17,7 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
-      day: monday
+      interval: monthly
       time: !!str 08:00
       timezone: Australia/Melbourne
     groups:
