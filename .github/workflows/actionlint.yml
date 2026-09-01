@@ -26,13 +26,12 @@ jobs:
       osv-sarif: ${{ steps.osv.outputs.sarif }}
     steps:
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@04a6d8cfe9d251e2afb78c5bdc6274ec9642aea2 # master
+        uses: Homebrew/actions/setup-homebrew@3cdb78d0f62ad29dd32de765782654f4eedea607 # 2026.08.31.1
         with:
           core: false
           cask: false
-          test-bot: false
 
-      - uses: Homebrew/actions/cache-homebrew-prefix@04a6d8cfe9d251e2afb78c5bdc6274ec9642aea2 # main
+      - uses: Homebrew/actions/cache-homebrew-prefix@3cdb78d0f62ad29dd32de765782654f4eedea607 # 2026.08.31.1
         with:
           install: actionlint shellcheck zizmor osv-scanner
           uninstall: true
