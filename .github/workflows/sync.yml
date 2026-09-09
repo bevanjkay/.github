@@ -8,8 +8,7 @@ on:
     - cron: "0 8 * * 3" # Every Wednesday at 8 AM
   workflow_dispatch:
 
-permissions:
-  contents: read
+permissions: {}
 
 defaults:
   run:
@@ -24,27 +23,47 @@ jobs:
     if: github.repository == 'bevanjkay/.github'
     environment: github_actions
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       matrix:
-        repo:
-          - bevanjkay/bible-api
-          - bevanjkay/custom-scripts
-          - bevanjkay/docker-wwcc
-          - bevanjkay/dotfiles
-          - bevanjkay/fluro-sheet-music
-          - bevanjkay/homebrew-formulae
-          - bevanjkay/homebrew-tap
-          - bevanjkay/modern-square-kds
-          - bevanjkay/n8n-kaynas
-          - bevanjkay/pake-builder
-          - bevanjkay/personal-website
-          - bevanjkay/tools
-          - bevanjkay/yavic-responseportal
-          - bevanjkay/youthalivevictoria
-          - gatewaymedia/dotfiles
-          - gatewaymedia/giving-kiosk
-          - gatewaymedia/handbook
-          - gatewaymedia/homebrew-tap
+        include:
+          - owner: bevanjkay
+            repo: bible-api
+          - owner: bevanjkay
+            repo: custom-scripts
+          - owner: bevanjkay
+            repo: docker-wwcc
+          - owner: bevanjkay
+            repo: dotfiles
+          - owner: bevanjkay
+            repo: fluro-sheet-music
+          - owner: bevanjkay
+            repo: homebrew-formulae
+          - owner: bevanjkay
+            repo: homebrew-tap
+          - owner: bevanjkay
+            repo: modern-square-kds
+          - owner: bevanjkay
+            repo: n8n-kaynas
+          - owner: bevanjkay
+            repo: pake-builder
+          - owner: bevanjkay
+            repo: personal-website
+          - owner: bevanjkay
+            repo: tools
+          - owner: bevanjkay
+            repo: yavic-responseportal
+          - owner: bevanjkay
+            repo: youthalivevictoria
+          - owner: gatewaymedia
+            repo: dotfiles
+          - owner: gatewaymedia
+            repo: giving-kiosk
+          - owner: gatewaymedia
+            repo: handbook
+          - owner: gatewaymedia
+            repo: homebrew-tap
       fail-fast: false
     steps:
       - name: Clone source repository
@@ -52,19 +71,23 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Mint read token
+        id: read_token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.SYNC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+          owner: ${{ matrix.owner }}
+          repositories: ${{ matrix.repo }}
+          permission-contents: read
+
       - name: Clone target repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: ${{ matrix.repo }}
+          repository: ${{ matrix.owner }}/${{ matrix.repo }}
           path: target
-          token: ${{ secrets.BKDBOT_TOKEN }}
-          persist-credentials: true
-
-      - name: Configure Git user
-        run: |
-          cd target
-          git config user.name "bkdbot"
-          git config user.email "bkdbot@users.noreply.github.com"
+          token: ${{ steps.read_token.outputs.token }}
+          persist-credentials: false
 
       - name: Copy sync files
         run: |
@@ -75,53 +98,177 @@ jobs:
 
       - name: Detect changes
         id: detect_changes
-        run: |
-          cd target
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "changed=true" >> "${GITHUB_OUTPUT}"
-            git diff
-          else
-            echo "changed=false" >> "${GITHUB_OUTPUT}"
-          fi
-
-      - name: Create pull request
-        if: steps.detect_changes.outputs.changed == 'true'
-        run: |
-          cd target
-          git add -A
-          git commit -m "Synchronize shared configuration"
-          git checkout -B sync-shared-config
-
-          if gh api \
-              -X GET \
-              --header 'Accept: application/vnd.github+json' \
-              --header 'X-GitHub-Api-Version: 2022-11-28' \
-              "/repos/${GH_REPO}/pulls" \
-              -f head="${HEAD_PREFIX}:sync-shared-config" \
-              -f state=open |
-              jq --exit-status 'length == 0'
-          then
-            git push --set-upstream --force origin sync-shared-config
-            # shellcheck disable=SC2016
-            gh pr create \
-              --repo "${GH_REPO}" \
-              --head sync-shared-config \
-              --title "Synchronize shared configuration" \
-              --body 'This pull request was created automatically by the [`sync-shared-config`](https://github.com/bevanjkay/.github/blob/HEAD/.github/workflows/sync.yml) workflow.'
-          else
-            git fetch origin sync-shared-config
-            if ! git diff --no-ext-diff --quiet --exit-code origin/sync-shared-config; then
-              git push --force origin sync-shared-config
-            fi
-          fi
+        working-directory: target
         env:
-          GH_REPO: ${{ matrix.repo }}
-          GH_TOKEN: ${{ secrets.BKDBOT_TOKEN }}
-          HEAD_PREFIX: ${{ contains(matrix.repo, 'gatewaymedia/') && 'gatewaymedia' || 'bevanjkay' }}
+          CHANGED_FILES: ${{ runner.temp }}/changed-files.nul
+        run: |
+          # NUL-delimited throughout so the GraphQL payload never has to guess at
+          # a path containing whitespace.
+          status_entries="${RUNNER_TEMP}/status.nul"
+          git -c status.renames=false status --porcelain=v1 -z -uall > "${status_entries}"
+          : > "${CHANGED_FILES}"
+          while IFS= read -r -d '' entry; do
+            if [[ "${#entry}" -lt 4 || "${entry:2:1}" != " " ]]; then
+              echo "::error::unexpected git status record"
+              exit 1
+            fi
+            printf '%s\0' "${entry:3}" >> "${CHANGED_FILES}"
+          done < "${status_entries}"
+
+          if [[ ! -s "${CHANGED_FILES}" ]]; then
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          echo "changed=true" >> "${GITHUB_OUTPUT}"
+          tr '\0' '\n' < "${CHANGED_FILES}"
+          git diff
+
+      - name: Mint write token
+        id: write_token
+        if: steps.detect_changes.outputs.changed == 'true'
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.SYNC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SYNC_APP_PRIVATE_KEY }}
+          owner: ${{ matrix.owner }}
+          repositories: ${{ matrix.repo }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-workflows: write
+
+      - name: Create verified commit and pull request
+        if: steps.detect_changes.outputs.changed == 'true'
+        working-directory: target
+        env:
+          APP_SLUG: ${{ steps.write_token.outputs.app-slug }}
+          BRANCH: sync-shared-config
+          CHANGED_FILES: ${{ runner.temp }}/changed-files.nul
+          GH_REPO: ${{ matrix.owner }}/${{ matrix.repo }}
+          GH_TOKEN: ${{ steps.write_token.outputs.token }}
+          TITLE: Synchronize shared configuration
+        run: |
+          BOT_USER="${APP_SLUG}[bot]"
+          BASE_BRANCH="$(gh api "repos/${GH_REPO}" --jq .default_branch)"
+          BASE_SHA="$(git rev-parse HEAD)"
+
+          body_file="${RUNNER_TEMP}/pr-body.md"
+          {
+            echo "This pull request was created automatically by the [\`sync-shared-config\`](https://github.com/bevanjkay/.github/blob/HEAD/.github/workflows/sync.yml) workflow."
+            echo
+            echo "Synchronized files:"
+            while IFS= read -r -d '' path; do
+              printf -- "- \`%s\`\n" "${path}"
+            done < "${CHANGED_FILES}"
+          } > "${body_file}"
+
+          # Reset the branch to the base tip so the sync commit is always a
+          # single commit on current main rather than a stack of stale ones.
+          if gh api "repos/${GH_REPO}/git/ref/heads/${BRANCH}" >/dev/null 2>&1; then
+            gh api "repos/${GH_REPO}/git/refs/heads/${BRANCH}" -X PATCH \
+              -f "sha=${BASE_SHA}" -F force=true
+          else
+            gh api "repos/${GH_REPO}/git/refs" -X POST \
+              -f "ref=refs/heads/${BRANCH}" -f "sha=${BASE_SHA}"
+          fi
+
+          # shellcheck disable=SC2016 # Ruby interpolation is intentionally literal to the shell.
+          file_changes="$(ruby -rjson -e '
+            paths = File.binread(ENV.fetch("CHANGED_FILES")).split("\0").reject(&:empty?)
+            additions = []
+            deletions = []
+            paths.each do |path|
+              abort("unsafe path in sync manifest: #{path.inspect}") if path.each_codepoint.any? { |cp| cp < 0x20 || cp == 0x7f }
+              if File.symlink?(path)
+                abort("symlink in sync manifest: #{path.inspect}")
+              elsif File.file?(path)
+                additions << { path: path, contents: [File.binread(path)].pack("m0") }
+              elsif !File.exist?(path)
+                deletions << { path: path }
+              else
+                abort("non-file in sync manifest: #{path.inspect}")
+              end
+            end
+            print JSON.generate({ additions: additions, deletions: deletions })
+          ')"
+
+          # createCommitOnBranch produces a GitHub-signed commit, so the sync is
+          # verified without a signing key ever reaching the runner.
+          commit_response="${RUNNER_TEMP}/commit-response.json"
+          # shellcheck disable=SC2016 # jq variables are intentionally literal to the shell.
+          jq -n \
+            --arg repo "${GH_REPO}" \
+            --arg branch "${BRANCH}" \
+            --arg title "${TITLE}" \
+            --arg head "${BASE_SHA}" \
+            --argjson file_changes "${file_changes}" \
+            '{
+              query: "mutation($input: CreateCommitOnBranchInput!) { createCommitOnBranch(input: $input) { commit { oid url } } }",
+              variables: {
+                input: {
+                  branch: { repositoryNameWithOwner: $repo, branchName: $branch },
+                  message: { headline: $title },
+                  fileChanges: $file_changes,
+                  expectedHeadOid: $head
+                }
+              }
+            }' | gh api graphql --input - > "${commit_response}"
+          commit_oid="$(jq -er '.data.createCommitOnBranch.commit.oid' "${commit_response}")"
+
+          # Match on the same-repository head only; a fork can hold a branch of
+          # the same name and must never be mistaken for ours.
+          open_pulls="$(gh api --paginate "repos/${GH_REPO}/pulls?state=open&per_page=100" | jq -s add)"
+          pr_number="$(jq -r \
+            --arg repo "${GH_REPO}" \
+            --arg branch "${BRANCH}" \
+            --arg base "${BASE_BRANCH}" \
+            '[.[] | select(.head.repo.full_name == $repo and .head.ref == $branch and .base.ref == $base)] |
+             if length > 1 then "ambiguous" else (.[0].number // "") end' <<< "${open_pulls}")"
+
+          if [[ "${pr_number}" == "ambiguous" ]]; then
+            echo "::error::more than one open pull request targets ${BRANCH}"
+            exit 1
+          fi
+
+          if [[ -n "${pr_number}" ]]; then
+            author="$(jq -r --argjson n "${pr_number}" '.[] | select(.number == $n) | .user.login' <<< "${open_pulls}")"
+            if [[ "${author}" != "${BOT_USER}" ]]; then
+              echo "::error::${GH_REPO}#${pr_number} on ${BRANCH} is not owned by ${BOT_USER}"
+              exit 1
+            fi
+            jq -n \
+              --arg title "${TITLE}" \
+              --rawfile body "${body_file}" \
+              '{ title: $title, body: $body }' |
+              gh api "repos/${GH_REPO}/pulls/${pr_number}" -X PATCH --input - >/dev/null
+          else
+            pr_number="$(jq -n \
+              --arg title "${TITLE}" \
+              --arg head "${BRANCH}" \
+              --arg base "${BASE_BRANCH}" \
+              --rawfile body "${body_file}" \
+              '{ title: $title, head: $head, base: $base, body: $body }' |
+              gh api "repos/${GH_REPO}/pulls" -X POST --input - --jq .number)"
+          fi
+
+          # Resetting the branch clears any auto-merge already queued, so it has
+          # to be re-enabled on every run. --match-head-commit refuses to queue
+          # anything but the commit this run just created.
+          for attempt in 1 2 3; do
+            if gh pr merge "${pr_number}" --repo "${GH_REPO}" --auto --squash \
+                --match-head-commit "${commit_oid}"; then
+              break
+            fi
+            if [[ "${attempt}" -eq 3 ]]; then
+              echo "::warning::could not enable auto-merge for ${GH_REPO}#${pr_number}; the pull request is open and needs a manual merge"
+            fi
+            sleep 5
+          done
 
   conclusion:
     needs: sync
     runs-on: ubuntu-slim
+    permissions: {}
     if: always()
     steps:
       - name: Result
