@@ -58,12 +58,24 @@ jobs:
             repo: youthalivevictoria
           - owner: gatewaymedia
             repo: dotfiles
-          - owner: gatewaymedia
-            repo: giving-kiosk
-          - owner: gatewaymedia
+          - owner: residechurch
             repo: handbook
           - owner: gatewaymedia
             repo: homebrew-tap
+          - owner: bevanjkay
+            repo: printmax
+          - owner: bevanjkay
+            repo: website-auditor
+          - owner: bevanjkay
+            repo: globalmoji
+          - owner: bevanjkay
+            repo: dockwizard
+          - owner: residechurch
+            repo: giving-kiosk
+          - owner: residechurch
+            repo: reside-calendar-widget
+          - owner: residechurch
+            repo: volunteer-dashboard
       fail-fast: false
     steps:
       - name: Clone source repository
