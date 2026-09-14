@@ -105,7 +105,6 @@ jobs:
         run: |
           mkdir -p target/.github/workflows
           cp .github/workflows/actionlint.yml target/.github/workflows/actionlint.yml
-          cp .github/zizmor.yml target/.github/zizmor.yml
           cp .github/dependabot-mirror.yml target/.github/dependabot.yml
 
       - name: Detect changes
