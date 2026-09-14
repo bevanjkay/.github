@@ -56,11 +56,11 @@ jobs:
             repo: yavic-responseportal
           - owner: bevanjkay
             repo: youthalivevictoria
-          - owner: gatewaymedia
+          - owner: residechurch
             repo: dotfiles
           - owner: residechurch
             repo: handbook
-          - owner: gatewaymedia
+          - owner: residechurch
             repo: homebrew-tap
           - owner: bevanjkay
             repo: printmax
@@ -76,6 +76,8 @@ jobs:
             repo: reside-calendar-widget
           - owner: residechurch
             repo: volunteer-dashboard
+          - owner: residechurch
+            repo: cpt-sync-plugin
       fail-fast: false
     steps:
       - name: Clone source repository
