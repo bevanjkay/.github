@@ -33,6 +33,13 @@ jobs:
         with:
           persist-credentials: false
 
+      # The SARIF report is produced before the gating run, so findings still
+      # reach code scanning when the gate fails and the upload job has an
+      # artifact to fetch.
+      - run: zizmor --format sarif --no-exit-codes . > results.sarif
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - run: zizmor .
 
       - run: actionlint
@@ -78,10 +85,6 @@ jobs:
               echo "- No SARIF output generated."
             fi
           } >> "${GITHUB_STEP_SUMMARY}"
-
-      - run: zizmor --format sarif . > results.sarif
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       - name: Upload SARIF file
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
