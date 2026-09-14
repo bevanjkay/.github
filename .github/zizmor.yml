@@ -1,5 +1,0 @@
-rules:
-  dangerous-triggers:
-    ignore:
-      - publish.yml
-      - triage.yml

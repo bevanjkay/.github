@@ -6,8 +6,16 @@ matrix by opening a pull request in each one whenever the copy here changes.
 | Hub file                            | Target path                       |
 | ----------------------------------- | --------------------------------- |
 | `.github/workflows/actionlint.yml`  | `.github/workflows/actionlint.yml` |
-| `.github/zizmor.yml`                | `.github/zizmor.yml`              |
 | `.github/dependabot-mirror.yml`     | `.github/dependabot.yml`          |
+
+zizmor configuration is deliberately not synced. A `dangerous-triggers` ignore
+belongs on the `on:` line of the workflow that needs it, with the reason beside
+it, so a repository never depends on a name-based ignore list held elsewhere:
+
+```yaml
+on: # zizmor: ignore[dangerous-triggers] -- comments only, no checkout of PR code
+  pull_request_target:
+```
 
 The synced `actionlint.yml` is a thin caller of `reusable-actionlint.yml` in
 this repository, pinned to a tagged commit. It exposes one stable job,
