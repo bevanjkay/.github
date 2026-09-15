@@ -1,0 +1,13 @@
+schema: 1
+
+# Overrides for bevanjkay/rss-boi. Everything not named here comes from
+# sync/defaults.yml.
+dependabot:
+  docker:
+    ignore:
+      - dependency-name: node
+        reason: |-
+          Track the Node LTS line for published images. Node 26 only becomes LTS
+          in October 2026; bump this deliberately rather than automatically.
+        versions:
+          - ">=25"

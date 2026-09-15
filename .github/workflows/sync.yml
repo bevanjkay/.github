@@ -105,11 +105,14 @@ jobs:
           token: ${{ steps.read_token.outputs.token }}
           persist-credentials: false
 
-      - name: Copy sync files
+      - name: Render sync files
+        env:
+          OWNER: ${{ matrix.owner }}
+          REPO: ${{ matrix.repo }}
         run: |
           mkdir -p target/.github/workflows
           cp .github/workflows/actionlint.yml target/.github/workflows/actionlint.yml
-          cp .github/dependabot-mirror.yml target/.github/dependabot.yml
+          ruby sync/render.rb "${OWNER}" "${REPO}" target/.github/dependabot.yml
 
       - name: Detect changes
         id: detect_changes

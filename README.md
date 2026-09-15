@@ -1,12 +1,41 @@
 # Shared configuration
 
-`sync.yml` keeps a small set of files identical across every repository in its
+`sync.yml` keeps a small set of files in step across every repository in its
 matrix by opening a pull request in each one whenever the copy here changes.
+`actionlint.yml` is copied verbatim; `dependabot.yml` is rendered per
+repository, so one repository can hold a dependency the rest of the fleet does
+not.
 
 | Hub file                            | Target path                       |
 | ----------------------------------- | --------------------------------- |
 | `.github/workflows/actionlint.yml`  | `.github/workflows/actionlint.yml` |
-| `.github/dependabot-mirror.yml`     | `.github/dependabot.yml`          |
+| `sync/templates/dependabot.yml.erb` | `.github/dependabot.yml`          |
+
+## Per-repository overrides
+
+`sync/render.rb` renders `.github/dependabot.yml` from `sync/defaults.yml`. A
+repository that needs to differ gets `sync/repos/<owner>/<repo>.yml`; every
+repository without one renders the defaults byte for byte.
+
+```yaml
+# sync/repos/bevanjkay/rss-boi.yml
+schema: 1
+dependabot:
+  docker:
+    ignore:
+      - dependency-name: node
+        reason: |-
+          Track the Node LTS line for published images.
+        versions:
+          - ">=25"
+```
+
+Overrides are keyed by ecosystem. `ignore` entries append to the shared holds,
+so a repository can add a hold but never drop a fleet-wide one. `skip: true`
+omits an ecosystem the repository does not use, and `directory`/`directories`
+repoints one. A `reason` becomes the comment above the entry in the rendered
+file, so the why survives into the target repository. Render locally with
+`ruby sync/render.rb <owner> <repo> /dev/stdout`.
 
 zizmor configuration is deliberately not synced. A `dangerous-triggers` ignore
 belongs on the `on:` line of the workflow that needs it, with the reason beside

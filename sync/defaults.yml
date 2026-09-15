@@ -1,0 +1,62 @@
+schema: 1
+
+# Applied to every entry below, and to every repository that does not override
+# them. Kept separate so a cadence change is one edit rather than five.
+schedule:
+  interval: monthly
+  time: !!str 08:00
+  timezone: Australia/Melbourne
+cooldown:
+  default-days: 7
+
+ecosystems:
+  - package-ecosystem: npm
+    group: npm-dependencies
+    directories:
+      - /
+      - /**/*
+    ignore:
+      - dependency-name: typescript
+        reason: |-
+          TypeScript 7 is the native compiler line. Hold every repository on 6.x
+          until it has been migrated by hand.
+        versions:
+          - ">=7"
+
+  - package-ecosystem: github-actions
+    group: gh-actions
+    directory: /
+    exclude-paths:
+      - .github/workflows/actionlint.yml
+
+  - package-ecosystem: docker
+    group: docker-dependencies
+    directories:
+      - /
+      - /**/*
+    ignore: &datastore-majors
+      - dependency-name: postgres
+        reason: |-
+          Datastore majors are migrations, not version bumps. Postgres needs a
+          pg_upgrade or a dump/restore, and the 18 image additionally moved PGDATA
+          to /var/lib/postgresql/<major>/docker, so a compose mount written for
+          17 or earlier is silently the wrong path. Redis data survives a major,
+          but its licence and defaults have not. Bump both by hand.
+        update-types:
+          - version-update:semver-major
+      - dependency-name: redis
+        update-types:
+          - version-update:semver-major
+
+  - package-ecosystem: docker-compose
+    group: docker-compose-dependencies
+    directories:
+      - /
+      - /**/*
+    ignore: *datastore-majors
+
+  - package-ecosystem: pip
+    group: pip-dependencies
+    directories:
+      - /
+      - /**/*
