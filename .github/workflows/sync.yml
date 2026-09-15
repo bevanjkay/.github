@@ -78,6 +78,8 @@ jobs:
             repo: volunteer-dashboard
           - owner: residechurch
             repo: cpt-sync-plugin
+          - owner: bevanjkay
+            repo: rss-boi
       fail-fast: false
     steps:
       - name: Clone source repository
