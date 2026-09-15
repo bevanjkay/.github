@@ -1,0 +1,51 @@
+<%# Rendered by sync/render.rb. Edit sync/defaults.yml or sync/repos/<owner>/<repo>.yml, never the output. -%>
+version: 2
+updates:
+<% entries.each do |entry| -%>
+  - package-ecosystem: <%= entry.fetch("package-ecosystem") %>
+<% if entry["directory"] -%>
+    directory: <%= entry.fetch("directory") %>
+<% else -%>
+    directories:
+<% entry.fetch("directories").each do |directory| -%>
+      - <%= directory %>
+<% end -%>
+<% end -%>
+<% if entry["exclude-paths"] -%>
+    exclude-paths:
+<% entry.fetch("exclude-paths").each do |path| -%>
+      - <%= path %>
+<% end -%>
+<% end -%>
+    schedule:
+      interval: <%= entry.fetch("schedule").fetch("interval") %>
+      time: !!str <%= entry.fetch("schedule").fetch("time") %>
+      timezone: <%= entry.fetch("schedule").fetch("timezone") %>
+    groups:
+      <%= entry.fetch("group") %>:
+        patterns:
+          - "*"
+<% unless entry.fetch("ignore", []).empty? -%>
+    ignore:
+<% entry.fetch("ignore").each do |ignore| -%>
+<% ignore.fetch("reason", "").to_s.each_line(chomp: true) do |line| -%>
+      # <%= line %>
+<% end -%>
+      - dependency-name: <%= ignore.fetch("dependency-name") %>
+<% if ignore["versions"] -%>
+        versions:
+<% ignore.fetch("versions").each do |version| -%>
+          - "<%= version %>"
+<% end -%>
+<% end -%>
+<% if ignore["update-types"] -%>
+        update-types:
+<% ignore.fetch("update-types").each do |update_type| -%>
+          - <%= update_type %>
+<% end -%>
+<% end -%>
+<% end -%>
+<% end -%>
+    cooldown:
+      default-days: <%= entry.fetch("cooldown").fetch("default-days") %>
+<% end -%>
