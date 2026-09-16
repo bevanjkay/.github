@@ -102,6 +102,8 @@ jobs:
             repo: responsedashboard
           - owner: youthalivevictoria
             repo: responseportal
+          - owner: youthalivevictoria
+            repo: databasebackup
       fail-fast: false
     steps:
       - name: Clone source repository
