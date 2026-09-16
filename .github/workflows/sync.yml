@@ -80,6 +80,8 @@ jobs:
             repo: cpt-sync-plugin
           - owner: bevanjkay
             repo: rss-boi
+          - owner: youthalivevictoria
+            repo: gea
       fail-fast: false
     steps:
       - name: Clone source repository
