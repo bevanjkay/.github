@@ -9,3 +9,6 @@
 
 ## GitHub Actions Pinning
 - Pin every `uses:` to a commit SHA with the release tag in the trailing comment; `Homebrew/actions/*` is no exception (it now warns that `master` is deprecated), so there is no zizmor `unpinned-uses` policy override; zizmor ignores go inline on the workflow that needs them, never in a config file.
+
+## Sync Matrix
+- Drop a repository from the matrix in `sync.yml` once it is archived; the target is read-only, so the job fails at the branch reset and the `conclusion` job reddens the whole run.
