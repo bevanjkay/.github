@@ -53,8 +53,6 @@ jobs:
           - owner: bevanjkay
             repo: tools
           - owner: bevanjkay
-            repo: yavic-responseportal
-          - owner: bevanjkay
             repo: youthalivevictoria
           - owner: residechurch
             repo: dotfiles
@@ -82,6 +80,28 @@ jobs:
             repo: rss-boi
           - owner: youthalivevictoria
             repo: gea
+          - owner: bevanjkay
+            repo: docker-fuzzball
+          - owner: bevanjkay
+            repo: pro-bible-importer
+          - owner: bevanjkay
+            repo: propresenter-presentation-builder
+          - owner: bevanjkay
+            repo: smc-check
+          - owner: residechurch
+            repo: fluro-forms-bricks-plugin
+          - owner: residechurch
+            repo: reside-website-theme
+          - owner: residechurch
+            repo: sermon-notes
+          - owner: youthalivevictoria
+            repo: contact-list-maker
+          - owner: youthalivevictoria
+            repo: mainevent-intro
+          - owner: youthalivevictoria
+            repo: responsedashboard
+          - owner: youthalivevictoria
+            repo: responseportal
       fail-fast: false
     steps:
       - name: Clone source repository
