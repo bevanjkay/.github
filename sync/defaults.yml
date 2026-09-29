@@ -60,3 +60,9 @@ ecosystems:
     directories:
       - /
       - /**/*
+
+  - package-ecosystem: deno
+    group: deno-dependencies
+    directories:
+      - /
+      - /**/*
