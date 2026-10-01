@@ -104,6 +104,8 @@ jobs:
             repo: responseportal
           - owner: youthalivevictoria
             repo: databasebackup
+          - owner: bevanjkay
+            repo: kaynas-compose
       fail-fast: false
     steps:
       - name: Clone source repository
