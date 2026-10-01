@@ -12,3 +12,15 @@ cooldown:
   reason: |-
     Below zizmor's 7-day floor by choice: homelab images should land within
     days, and two still lets a broken release be pulled before it is proposed.
+
+dependabot:
+  docker-compose:
+    ignore:
+      - dependency-name: "*meilisearch"
+        reason: |-
+          Meilisearch can refuse to open a database written by an older minor
+          without a dump and import, which takes Karakeep search down until it
+          is rebuilt. Bump it by hand.
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor

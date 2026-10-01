@@ -36,7 +36,8 @@ updates:
 <% ignore.fetch("reason", "").to_s.each_line(chomp: true) do |line| -%>
       # <%= line %>
 <% end -%>
-      - dependency-name: <%= ignore.fetch("dependency-name") %>
+<% name = ignore.fetch("dependency-name") -%>
+      - dependency-name: <%= name.include?("*") ? %("#{name}") : name %>
 <% if ignore["versions"] -%>
         versions:
 <% ignore.fetch("versions").each do |version| -%>
