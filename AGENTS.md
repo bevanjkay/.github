@@ -4,7 +4,7 @@
 - In `.github/dependabot*.yml`, keep path scalars plain (`/`, `/*`) instead of quoted to satisfy `yaml/plain-scalar`; `sync/templates/dependabot.yml.erb` emits them plain for the same reason.
 
 ## Dependabot Ignores
-- Hold stateful datastore images (`postgres`, `redis`) at their current major in `sync/defaults.yml`. A datastore major is a migration, not a version bump, and no repository here has CI that can prove the data survived one.
+- Hold stateful datastore images (`postgres`, `redis`, `valkey`, `mysql`) at their current major in `sync/defaults.yml`. Prefix the name with `*`: Dependabot names a namespaced image `library/postgres` or `immich-app/postgres`, which a bare `postgres` does not match. A datastore major is a migration, not a version bump, and no repository here has CI that can prove the data survived one.
 - A hold that applies to one repository belongs in `sync/repos/<owner>/<repo>.yml`, not in `sync/defaults.yml`; repository `ignore` entries append to the shared holds and cannot drop them.
 
 ## Dependabot Grouping
