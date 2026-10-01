@@ -52,5 +52,13 @@ updates:
 <% end -%>
 <% end -%>
     cooldown:
-      default-days: <%= entry.fetch("cooldown").fetch("default-days") %>
+<% cooldown = entry.fetch("cooldown") -%>
+<% if cooldown.fetch("default-days") < ZIZMOR_MIN_COOLDOWN_DAYS -%>
+<% cooldown.fetch("reason").to_s.each_line(chomp: true) do |line| -%>
+      # <%= line %>
+<% end -%>
+      default-days: <%= cooldown.fetch("default-days") %> # zizmor: ignore[dependabot-cooldown]
+<% else -%>
+      default-days: <%= cooldown.fetch("default-days") %>
+<% end -%>
 <% end -%>

@@ -15,6 +15,7 @@ require "yaml"
 class RenderError < StandardError; end
 
 ROOT = File.expand_path("..", __dir__)
+ZIZMOR_MIN_COOLDOWN_DAYS = 7
 
 def load_yaml(path)
   YAML.safe_load_file(path, aliases: true, permitted_classes: [])
@@ -69,7 +70,12 @@ def render(owner, repo)
   raise RenderError, "#{overrides_path}: no such ecosystem: #{stray.join(", ")}" unless stray.empty?
 
   schedule = merge_setting(defaults, overrides, "schedule", %w[interval time timezone], overrides_path)
-  cooldown = merge_setting(defaults, overrides, "cooldown", %w[default-days], overrides_path)
+  cooldown = merge_setting(defaults, overrides, "cooldown", %w[default-days reason], overrides_path)
+  # zizmor's dependabot-cooldown audit fails anything under seven days, so a
+  # shorter cooldown is rendered with an inline ignore and must say why.
+  if cooldown.fetch("default-days") < ZIZMOR_MIN_COOLDOWN_DAYS && cooldown.fetch("reason", "").to_s.strip.empty?
+    raise RenderError, "#{overrides_path}: cooldown under #{ZIZMOR_MIN_COOLDOWN_DAYS} days needs a reason"
+  end
 
   entries = defaults.fetch("ecosystems").filter_map do |entry|
     override = by_ecosystem[entry.fetch("package-ecosystem")]
