@@ -22,14 +22,26 @@ rescue Psych::Exception => e
   raise RenderError, "#{path}: #{e.message}"
 end
 
+# A repository-level `schedule` or `cooldown` merges key by key over the
+# defaults and applies to every ecosystem, so a repository names only what
+# differs. Only keys the template renders are accepted; anything else would be
+# silently dropped from the output.
+def merge_setting(defaults, overrides, key, allowed, path)
+  override = overrides.fetch(key, {})
+  unknown = override.keys - allowed
+  raise RenderError, "#{path}: unknown #{key} keys: #{unknown.join(", ")}" unless unknown.empty?
+
+  defaults.fetch(key).merge(override)
+end
+
 # Repository overrides are keyed by ecosystem so a repository names only the
 # entry it cares about. `ignore` appends to the shared holds rather than
 # replacing them: a repository-specific pin is an extra reason to hold a
 # dependency, never a licence to drop a fleet-wide one.
-def merge_entry(entry, override, defaults)
+def merge_entry(entry, override, schedule, cooldown)
   merged = entry.dup
-  merged["schedule"] = defaults.fetch("schedule")
-  merged["cooldown"] = defaults.fetch("cooldown")
+  merged["schedule"] = schedule
+  merged["cooldown"] = cooldown
   return merged if override.nil?
 
   unknown = override.keys - %w[ignore directory directories skip]
@@ -56,11 +68,14 @@ def render(owner, repo)
   stray = by_ecosystem.keys - known
   raise RenderError, "#{overrides_path}: no such ecosystem: #{stray.join(", ")}" unless stray.empty?
 
+  schedule = merge_setting(defaults, overrides, "schedule", %w[interval time timezone], overrides_path)
+  cooldown = merge_setting(defaults, overrides, "cooldown", %w[default-days], overrides_path)
+
   entries = defaults.fetch("ecosystems").filter_map do |entry|
     override = by_ecosystem[entry.fetch("package-ecosystem")]
     next if override&.fetch("skip", false)
 
-    merge_entry(entry, override, defaults)
+    merge_entry(entry, override, schedule, cooldown)
   end
   raise RenderError, "every ecosystem skipped for #{owner}/#{repo}" if entries.empty?
 

@@ -34,7 +34,10 @@ Overrides are keyed by ecosystem. `ignore` entries append to the shared holds,
 so a repository can add a hold but never drop a fleet-wide one. `skip: true`
 omits an ecosystem the repository does not use, and `directory`/`directories`
 repoints one. A `reason` becomes the comment above the entry in the rendered
-file, so the why survives into the target repository. Render locally with
+file, so the why survives into the target repository. Top-level `schedule` and
+`cooldown` keys apply to every ecosystem in the repository and merge over the
+defaults, so `schedule: {interval: daily}` keeps the shared time and timezone.
+Render locally with
 `ruby sync/render.rb <owner> <repo> /dev/stdout`.
 
 zizmor configuration is deliberately not synced. A `dangerous-triggers` ignore
