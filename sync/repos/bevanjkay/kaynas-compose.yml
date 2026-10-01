@@ -4,9 +4,11 @@ schema: 1
 # sync/defaults.yml.
 
 # Merging a stack's pull request deploys it to the homelab, so image bumps
-# should arrive within days rather than wait for the monthly run. The short
-# cooldown still lets a broken release be pulled before it is proposed.
+# should arrive within days rather than wait for the monthly run.
 schedule:
   interval: daily
 cooldown:
   default-days: 2
+  reason: |-
+    Below zizmor's 7-day floor by choice: homelab images should land within
+    days, and two still lets a broken release be pulled before it is proposed.
