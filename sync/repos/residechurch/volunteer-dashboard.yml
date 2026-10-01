@@ -1,0 +1,12 @@
+schema: 1
+
+# Overrides for residechurch/volunteer-dashboard. Everything not named here
+# comes from sync/defaults.yml.
+dependabot:
+  npm:
+    # `worker` is a pnpm workspace member with no lockfile of its own. A
+    # separate `/worker` job bumps its package.json without touching the root
+    # pnpm-lock.yaml, so CI fails on every such pull request. The root job
+    # updates the whole workspace together.
+    directories:
+      - /
