@@ -15,6 +15,9 @@ cooldown:
 
 dependabot:
   docker-compose:
+    # One pull request per image, so each touches one stack and merging it
+    # redeploys only that stack. Dependabot cannot group per directory.
+    grouped: false
     ignore:
       - dependency-name: "*meilisearch"
         reason: |-
