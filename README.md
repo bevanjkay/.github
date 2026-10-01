@@ -37,7 +37,7 @@ repoints one. A `reason` becomes the comment above the entry in the rendered
 file, so the why survives into the target repository. Top-level `schedule` and
 `cooldown` keys apply to every ecosystem in the repository and merge over the
 defaults, so `schedule: {interval: daily}` keeps the shared time and timezone.
-A cooldown under zizmor's 7-day floor needs a `reason`, rendered above it with
+An ecosystem can set `grouped: false` to drop its groups and get one pull request per dependency; Dependabot cannot group per directory. A cooldown under zizmor's 7-day floor needs a `reason`, rendered above it with
 an inline `zizmor: ignore[dependabot-cooldown]`.
 Render locally with
 `ruby sync/render.rb <owner> <repo> /dev/stdout`.

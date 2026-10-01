@@ -21,6 +21,7 @@ updates:
       interval: <%= entry.fetch("schedule").fetch("interval") %>
       time: !!str <%= entry.fetch("schedule").fetch("time") %>
       timezone: <%= entry.fetch("schedule").fetch("timezone") %>
+<% if entry.fetch("grouped", true) -%>
     groups:
       <%= entry.fetch("group") %>:
         applies-to: version-updates
@@ -30,6 +31,7 @@ updates:
         applies-to: security-updates
         patterns:
           - "*"
+<% end -%>
 <% unless entry.fetch("ignore", []).empty? -%>
     ignore:
 <% entry.fetch("ignore").each do |ignore| -%>

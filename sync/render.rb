@@ -45,8 +45,17 @@ def merge_entry(entry, override, schedule, cooldown)
   merged["cooldown"] = cooldown
   return merged if override.nil?
 
-  unknown = override.keys - %w[ignore directory directories skip]
+  unknown = override.keys - %w[ignore directory directories skip grouped]
   raise RenderError, "unknown override keys: #{unknown.join(", ")}" unless unknown.empty?
+
+  # Dependabot groups across every listed directory, never per directory, so
+  # a repository that wants one pull request per directory opts out of
+  # grouping entirely and gets one per dependency instead.
+  if override.key?("grouped")
+    raise RenderError, "grouped must be true or false" unless [true, false].include?(override["grouped"])
+
+    merged["grouped"] = override["grouped"]
+  end
 
   if override["directory"] || override["directories"]
     merged.delete("directory")
