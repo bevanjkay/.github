@@ -106,6 +106,8 @@ jobs:
             repo: databasebackup
           - owner: bevanjkay
             repo: kaynas-compose
+          - owner: bevanjkay
+            repo: everythingturf
       fail-fast: false
     steps:
       - name: Clone source repository
