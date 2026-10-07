@@ -108,6 +108,8 @@ jobs:
             repo: kaynas-compose
           - owner: bevanjkay
             repo: everythingturf
+          - owner: youthalivevictoria
+            repo: regional-portal
       fail-fast: false
     steps:
       - name: Clone source repository
