@@ -3,9 +3,8 @@ schema: 1
 # Overrides for residechurch/server. Everything not named here comes from
 # sync/defaults.yml.
 
-# Merging a stack's pull request deploys it to the Reside server or VPS through
-# Portainer, so image bumps should arrive within days rather than wait for the
-# monthly run.
+# Merging a pull request in this repository deploys it, so image bumps should
+# arrive within days rather than wait for the monthly run.
 schedule:
   interval: daily
 cooldown:
@@ -30,21 +29,18 @@ dependabot:
     ignore:
       - dependency-name: "*mariadb"
         reason: |-
-          MariaDB minors cross LTS lines (11.4 to 11.8) and convert the data
-          files on first start, with no way back. Dump the database and bump it
-          by hand.
+          MariaDB minors can cross LTS lines and convert the data files on
+          first start, with no way back. Dump the database and bump it by hand.
         update-types:
           - version-update:semver-major
           - version-update:semver-minor
       - dependency-name: mattermost/mattermost-team-edition
         reason: |-
-          v11 needs PostgreSQL 14+ (the stack runs 13), retires Bleve and
-          manually installed plugins, and migrates password hashes so a rollback
-          locks people out. Upgrade Postgres and check the plugins first, then
-          bump to the 11 ESR by hand.
+          Majors change database and plugin requirements and cannot be rolled
+          back cleanly once people have signed in. Bump by hand.
         update-types:
           - version-update:semver-major
       - dependency-name: portainer/agent
         reason: |-
-          The agent must run the Portainer server's version. Bump both together
-          by hand.
+          The agent must match its server's version. Bump both together by
+          hand.
