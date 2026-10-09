@@ -110,6 +110,8 @@ jobs:
             repo: everythingturf
           - owner: youthalivevictoria
             repo: regional-portal
+          - owner: residechurch
+            repo: server
       fail-fast: false
     steps:
       - name: Clone source repository

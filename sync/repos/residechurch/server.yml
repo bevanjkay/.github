@@ -1,0 +1,42 @@
+schema: 1
+
+# Overrides for residechurch/server. Everything not named here comes from
+# sync/defaults.yml.
+
+# Merging a stack's pull request deploys it to the Reside server or VPS through
+# Portainer, so image bumps should arrive within days rather than wait for the
+# monthly run.
+schedule:
+  interval: daily
+cooldown:
+  default-days: 2
+  reason: |-
+    Below zizmor's 7-day floor by choice: merging deploys, so bumps should land
+    within days, and two still lets a broken release be pulled before it is
+    proposed.
+
+dependabot:
+  docker-compose:
+    # One pull request per image, so each touches one stack and merging it
+    # redeploys only that stack. Dependabot cannot group per directory.
+    grouped: false
+    groups:
+      immich:
+        reason: |-
+          Immich's server and machine-learning images must run the same
+          release, so they are proposed and merged together.
+        patterns:
+          - "*immich-app/immich-*"
+    ignore:
+      - dependency-name: "*mariadb"
+        reason: |-
+          MariaDB minors cross LTS lines (11.4 to 11.8) and convert the data
+          files on first start, with no way back. Dump the database and bump it
+          by hand.
+        update-types:
+          - version-update:semver-major
+          - version-update:semver-minor
+      - dependency-name: portainer/agent
+        reason: |-
+          The agent must run the Portainer server's version. Bump both together
+          by hand.

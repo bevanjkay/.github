@@ -35,6 +35,26 @@ def merge_setting(defaults, overrides, key, allowed, path)
   defaults.fetch(key).merge(override)
 end
 
+GROUP_NAME = /\A[a-z0-9][a-z0-9-]*\z/
+
+def validate_groups(groups)
+  raise RenderError, "groups must map a name to its patterns" unless groups.is_a?(Hash) && !groups.empty?
+
+  groups.each do |name, group|
+    raise RenderError, "group name #{name.inspect} must be lowercase letters, digits and hyphens" unless name.to_s.match?(GROUP_NAME)
+    raise RenderError, "group #{name} must be a mapping" unless group.is_a?(Hash)
+
+    unknown = group.keys - %w[patterns reason]
+    raise RenderError, "group #{name}: unknown keys: #{unknown.join(", ")}" unless unknown.empty?
+
+    patterns = group["patterns"]
+    unless patterns.is_a?(Array) && !patterns.empty? && patterns.all? { |p| p.is_a?(String) && !p.empty? }
+      raise RenderError, "group #{name} needs a non-empty list of patterns"
+    end
+  end
+  groups
+end
+
 # Repository overrides are keyed by ecosystem so a repository names only the
 # entry it cares about. `ignore` appends to the shared holds rather than
 # replacing them: a repository-specific pin is an extra reason to hold a
@@ -45,7 +65,7 @@ def merge_entry(entry, override, schedule, cooldown)
   merged["cooldown"] = cooldown
   return merged if override.nil?
 
-  unknown = override.keys - %w[ignore directory directories skip grouped]
+  unknown = override.keys - %w[ignore directory directories skip grouped groups]
   raise RenderError, "unknown override keys: #{unknown.join(", ")}" unless unknown.empty?
 
   # Dependabot groups across every listed directory, never per directory, so
@@ -55,6 +75,16 @@ def merge_entry(entry, override, schedule, cooldown)
     raise RenderError, "grouped must be true or false" unless [true, false].include?(override["grouped"])
 
     merged["grouped"] = override["grouped"]
+  end
+
+  # Named groups keep dependencies that must move together in one pull request,
+  # even when `grouped: false` splits everything else. They render ahead of the
+  # catch-all group because Dependabot files a dependency under the first group
+  # it matches.
+  if override.key?("groups")
+    merged["named_groups"] = validate_groups(override["groups"])
+    reserved = [entry.fetch("group"), "#{entry.fetch("group")}-security"] & merged["named_groups"].keys.map(&:to_s)
+    raise RenderError, "group #{reserved.first} clashes with the shared group" unless reserved.empty?
   end
 
   if override["directory"] || override["directories"]

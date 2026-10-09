@@ -21,8 +21,22 @@ updates:
       interval: <%= entry.fetch("schedule").fetch("interval") %>
       time: !!str <%= entry.fetch("schedule").fetch("time") %>
       timezone: <%= entry.fetch("schedule").fetch("timezone") %>
-<% if entry.fetch("grouped", true) -%>
+<% named_groups = entry.fetch("named_groups", {}) -%>
+<% if entry.fetch("grouped", true) || !named_groups.empty? -%>
     groups:
+<% end -%>
+<% named_groups.each do |name, group| -%>
+<% group.fetch("reason", "").to_s.each_line(chomp: true) do |line| -%>
+      # <%= line %>
+<% end -%>
+      <%= name %>:
+        applies-to: version-updates
+        patterns:
+<% group.fetch("patterns").each do |pattern| -%>
+          - "<%= pattern %>"
+<% end -%>
+<% end -%>
+<% if entry.fetch("grouped", true) -%>
       <%= entry.fetch("group") %>:
         applies-to: version-updates
         patterns:

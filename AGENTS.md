@@ -9,6 +9,7 @@
 
 ## Dependabot Grouping
 - A `groups` block defaults to `applies-to: version-updates`, so security updates stay one pull request per advisory no matter how broad the patterns are. `sync/templates/dependabot.yml.erb` emits a second `<group>-security` block per ecosystem to group those too.
+- For images that must release in lockstep (Immich server and machine learning), add a named `groups` entry in the repository override rather than relying on the catch-all; with `grouped: false` there is no catch-all to catch them.
 - A grouping change only reaches a target repository on the next sync run; existing ungrouped pull requests must be closed and re-triggered from the repository's Dependabot page before they come back combined.
 
 ## GitHub Actions Pinning
