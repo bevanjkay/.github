@@ -36,6 +36,14 @@ dependabot:
         update-types:
           - version-update:semver-major
           - version-update:semver-minor
+      - dependency-name: mattermost/mattermost-team-edition
+        reason: |-
+          v11 needs PostgreSQL 14+ (the stack runs 13), retires Bleve and
+          manually installed plugins, and migrates password hashes so a rollback
+          locks people out. Upgrade Postgres and check the plugins first, then
+          bump to the 11 ESR by hand.
+        update-types:
+          - version-update:semver-major
       - dependency-name: portainer/agent
         reason: |-
           The agent must run the Portainer server's version. Bump both together
