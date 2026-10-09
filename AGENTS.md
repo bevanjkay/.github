@@ -1,5 +1,8 @@
 # Repo Agent Notes
 
+## Public Repository
+- This repository is public, but many targets are private. Override `reason` text, commit messages and PR descriptions name the hazard, never a target's running versions, hosts or topology.
+
 ## Dependabot YAML Linting
 - In `.github/dependabot*.yml`, keep path scalars plain (`/`, `/*`) instead of quoted to satisfy `yaml/plain-scalar`; `sync/templates/dependabot.yml.erb` emits them plain for the same reason.
 
