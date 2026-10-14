@@ -112,6 +112,8 @@ jobs:
             repo: regional-portal
           - owner: residechurch
             repo: server
+          - owner: bevanjkay
+            repo: focus-up
       fail-fast: false
     steps:
       - name: Clone source repository
