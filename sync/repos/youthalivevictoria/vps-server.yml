@@ -1,0 +1,28 @@
+schema: 1
+
+# Overrides for youthalivevictoria/vps-server. Everything not named here comes
+# from sync/defaults.yml.
+
+# Merging a pull request in this repository deploys it. Weekly keeps upgrades
+# to one deliberate merge rather than one per patch release.
+schedule:
+  interval: weekly
+cooldown:
+  default-days: 2
+  reason: |-
+    Below zizmor's 7-day floor by choice: merging deploys, so bumps should land
+    within days, and two still lets a broken release be pulled before it is
+    proposed.
+
+dependabot:
+  docker-compose:
+    # One pull request per image, so each can be merged and deployed on its
+    # own.
+    grouped: false
+    ignore:
+      - dependency-name: n8nio/n8n
+        reason: |-
+          A major release removes nodes and settings. Run the migration report
+          and bump by hand.
+        update-types:
+          - version-update:semver-major

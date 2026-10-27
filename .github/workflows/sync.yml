@@ -114,6 +114,8 @@ jobs:
             repo: server
           - owner: bevanjkay
             repo: focus-up
+          - owner: youthalivevictoria
+            repo: vps-server
       fail-fast: false
     steps:
       - name: Clone source repository
