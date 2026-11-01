@@ -19,12 +19,12 @@ jobs:
       osv-sarif: ${{ steps.osv.outputs.sarif }}
     steps:
       - name: Set up Homebrew
-        uses: Homebrew/actions/setup-homebrew@848c272c7bfe984a197bd4d16383f4c106ec61e6 # 2026.09.21.1
+        uses: Homebrew/actions/setup-homebrew@d482da0e602890d3160aade42e72c8556103bf04 # 2026.10.26.1
         with:
           core: false
           cask: false
 
-      - uses: Homebrew/actions/cache-homebrew-prefix@848c272c7bfe984a197bd4d16383f4c106ec61e6 # 2026.09.21.1
+      - uses: Homebrew/actions/cache-homebrew-prefix@d482da0e602890d3160aade42e72c8556103bf04 # 2026.10.26.1
         with:
           install: actionlint shellcheck zizmor osv-scanner
           uninstall: true
@@ -63,7 +63,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload OSV Scanner SARIF artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always() && steps.osv.outputs.sarif == 'true' && github.event_name != 'merge_group'
         with:
           name: osv-results.sarif
@@ -90,7 +90,7 @@ jobs:
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Upload SARIF file
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always() && github.event_name != 'merge_group'
         with:
           name: results.sarif
@@ -109,13 +109,13 @@ jobs:
       security-events: write
     steps:
       - name: Download SARIF file
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: results.sarif
           path: results.sarif
 
       - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           sarif_file: results.sarif
           category: zizmor
@@ -134,13 +134,13 @@ jobs:
       security-events: write
     steps:
       - name: Download OSV Scanner SARIF artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: osv-results.sarif
           path: osv-results.sarif
 
       - name: Upload OSV Scanner SARIF to Code Scanning
-        uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4.38.1
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           sarif_file: osv-results.sarif
           category: osv-scanner
