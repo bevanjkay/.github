@@ -18,6 +18,9 @@ dependabot:
     # One pull request per image, so each touches one stack and merging it
     # redeploys only that stack. Dependabot cannot group per directory.
     grouped: false
+    # With one pull request per image, the default limit of five drops every
+    # bump past the fifth until earlier pull requests are merged.
+    open-pull-requests-limit: 20
     ignore:
       - dependency-name: "*meilisearch"
         reason: |-
