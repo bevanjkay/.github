@@ -21,6 +21,9 @@ updates:
       interval: <%= entry.fetch("schedule").fetch("interval") %>
       time: !!str <%= entry.fetch("schedule").fetch("time") %>
       timezone: <%= entry.fetch("schedule").fetch("timezone") %>
+<% if entry["open-pull-requests-limit"] -%>
+    open-pull-requests-limit: <%= entry.fetch("open-pull-requests-limit") %>
+<% end -%>
 <% named_groups = entry.fetch("named_groups", {}) -%>
 <% if entry.fetch("grouped", true) || !named_groups.empty? -%>
     groups:

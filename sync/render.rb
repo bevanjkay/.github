@@ -65,7 +65,7 @@ def merge_entry(entry, override, schedule, cooldown)
   merged["cooldown"] = cooldown
   return merged if override.nil?
 
-  unknown = override.keys - %w[ignore directory directories skip grouped groups]
+  unknown = override.keys - %w[ignore directory directories skip grouped groups open-pull-requests-limit]
   raise RenderError, "unknown override keys: #{unknown.join(", ")}" unless unknown.empty?
 
   # Dependabot groups across every listed directory, never per directory, so
@@ -75,6 +75,13 @@ def merge_entry(entry, override, schedule, cooldown)
     raise RenderError, "grouped must be true or false" unless [true, false].include?(override["grouped"])
 
     merged["grouped"] = override["grouped"]
+  end
+
+  if override.key?("open-pull-requests-limit")
+    limit = override["open-pull-requests-limit"]
+    raise RenderError, "open-pull-requests-limit must be a positive integer" unless limit.is_a?(Integer) && limit.positive?
+
+    merged["open-pull-requests-limit"] = limit
   end
 
   # Named groups keep dependencies that must move together in one pull request,
